@@ -29,38 +29,46 @@ struct poly
 		for(int i=2;i<=K;i<<=1){int W=pow(opt==1?G:GI,(P-1)/i);for(int j=0;j<K;j+=i){int w=1;For(k,0,(i>>1)-1){int x=a[j+k],y=1ll*w*a[j+k+(i>>1)]%P;a[j+k]=(x+y)%P;a[j+k+(i>>1)]=(x-y+P)%P;w=1ll*w*W%P;}}}
 		if(opt==-1){int x=pow(K,P-2);For(i,0,K-1)a[i]=1ll*a[i]*x%P;}
 	}
-	poly Changelength(int x){poly ans;ans.N=x;ans.K=1;while(ans.K<x)ans.K<<=1;ans.a=a;ans.a.resize(ans.K);For(i,min(N,x),ans.K-1)ans[i]=0;return ans;}
+	poly ChangeLength(int x){poly ans;ans.N=x;ans.K=1;while(ans.K<x)ans.K<<=1;ans.a=a;ans.a.resize(ans.K);For(i,min(N,x),ans.K-1)ans[i]=0;return ans;}
 	int&operator[](int x){return a[x];}
 	friend poly operator+(poly a,poly b){a.N=max(a.N,b.N);a.K=max(a.K,b.K);a.a.resize(a.K);b.a.resize(a.K);For(i,0,a.N-1)a[i]=(a[i]+b[i])%P;return a;}
 	friend poly operator+(poly a,int b){a[0]=(a[0]+b)%P;return a;}
 	friend poly operator-(poly a){For(i,0,a.N-1)a[i]=(P-a[i])%P;return a;}
 	friend poly operator-(poly a,poly b){return a+(-b);}
 	friend poly operator-(poly a,int b){return a+(P-b);}
-	friend poly operator*(poly a,poly b){int L=a.N+b.N-1;a=a.Changelength(L);b=b.Changelength(L);a.NTT(1);b.NTT(1);For(i,0,a.K-1)a[i]=1ll*a[i]*b[i]%P;a.NTT(-1);return a;}
+	friend poly operator*(poly a,poly b){int L=a.N+b.N-1;a=a.ChangeLength(L);b=b.ChangeLength(L);a.NTT(1);b.NTT(1);For(i,0,a.K-1)a[i]=1ll*a[i]*b[i]%P;a.NTT(-1);return a;}
 	friend poly operator*(poly a,int b){For(i,0,a.N-1)a[i]=1ll*a[i]*b%P;return a;}
-	friend pair<poly,poly>operator/(poly a,poly b){poly c=(a.Reverse()*b.Reverse().Changelength(a.N-b.N+1).Inv()).Changelength(a.N-b.N+1).Reverse(),d=(a-b*c).Changelength(b.N-1);return {c,d};}
+	friend pair<poly,poly>operator/(poly a,poly b){poly c=(a.Reverse()*b.Reverse().ChangeLength(a.N-b.N+1).Inv()).ChangeLength(a.N-b.N+1).Reverse(),d=(a-b*c).ChangeLength(b.N-1);return {c,d};}
 	friend poly operator/(poly a,int b){return a*pow(b,P-2);}
 	poly Reverse(){poly ans;ans.N=N;ans.K=K;ans.a.resize(K);For(i,0,N-1)ans[i]=a[N-1-i];return ans;}
 	poly Inv()
 	{
 		if(N==1)return poly(pow(a[0],P-2));
-		poly tmp=Changelength(N+1>>1).Inv();return (tmp*2-tmp*tmp*(*this)).Changelength(N);
+		poly tmp=ChangeLength(N+1>>1).Inv();return (tmp*2-tmp*tmp*(*this)).ChangeLength(N);
 	}
 	poly Sqrt()
 	{
 		if(N==1)return sqrt(a[0]);
-		poly tmp=Changelength(N+1>>1).Sqrt();return ((tmp+(*this)*tmp.Changelength(N).Inv())/2).Changelength(N);
+		poly tmp=ChangeLength(N+1>>1).Sqrt();return ((tmp+(*this)*tmp.ChangeLength(N).Inv())/2).ChangeLength(N);
 	}
 	poly Delta(){poly ans;ans.N=N;ans.K=K;ans.a.resize(ans.K);For(i,0,N-2)ans[i]=1ll*(i+1)*a[i+1]%P;return ans;}
 	poly Sum(){poly ans;ans.N=N;ans.K=K;ans.a.resize(ans.K);For(i,1,N)ans[i]=1ll*pow(i,P-2)*a[i-1]%P;return ans;}
-	poly Ln(){return (Delta()*Inv()).Changelength(N).Sum().Changelength(N);}
+	poly Ln(){return (Delta()*Inv()).ChangeLength(N).Sum().ChangeLength(N);}
 	poly Exp()
 	{
 		if(N==1)return poly(1);
-		poly tmp=Changelength(N+1>>1).Exp();return (tmp*(poly(1)-tmp.Changelength(N).Ln()+*this)).Changelength(N);
+		poly tmp=ChangeLength(N+1>>1).Exp();return (tmp*(poly(1)-tmp.ChangeLength(N).Ln()+*this)).ChangeLength(N);
 	}
 	poly Pow(int x){return (Ln()*x).Exp();}
 	poly Cos(){return (((*this)*I).Exp()+((*this)*(P-I)).Exp())/2;}
 	poly Sin(){return (((*this)*I).Exp()-((*this)*(P-I)).Exp())/2/I;}
 	void Print(){For(i,0,N-1)cout<<a[i]<<" \n"[i==N-1];}
+};
+struct Getval
+{
+	int M;poly f;vector<int>Point;vector<poly>mul;Getval(poly a,vector<int>point){M=point.size();f=a;Point=point;}
+	poly GetvalPre(int node,int l,int r,const vector<int>&point){if(l==r)return mul[node]=poly(2,vector<int>{P-point[l],1});int mid=l+r>>1;return mul[node]=GetvalPre(node<<1,l,mid,point)*GetvalPre(node<<1|1,mid+1,r,point);}
+	int GetMxnode(int node,int l,int r){if(l==r)return node;int mid=l+r>>1;return max(GetMxnode(node<<1,l,mid),GetMxnode(node<<1|1,mid+1,r));}
+	void GetvalWork(poly f,int node,int l,int r,vector<int>&ans){if(l==r){ans[l]=f[0];return;}int mid=l+r>>1;GetvalWork((f/mul[node<<1]).second,node<<1,l,mid,ans);GetvalWork((f/mul[node<<1|1]).second,node<<1|1,mid+1,r,ans);}
+	vector<int>GetVal(){f=f.ChangeLength(max(f.N,M+1));mul.resize(GetMxnode(1,0,M-1)+1);f=(f/GetvalPre(1,0,M-1,Point)).second;vector<int>ans(M);GetvalWork(f,1,0,M-1,ans);return ans;}
 };
