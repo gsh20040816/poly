@@ -40,6 +40,7 @@ struct poly
 	friend poly operator*(poly a,int b){For(i,0,a.N-1)a[i]=1ll*a[i]*b%P;return a;}
 	friend pair<poly,poly>operator/(poly a,poly b){int x=b.N;while(x&&!b[x-1])x--;b=b.ChangeLength(x);poly c=(a.Reverse()*b.Reverse().ChangeLength(a.N-b.N+1).Inv()).ChangeLength(a.N-b.N+1).Reverse(),d=(a-b*c).ChangeLength(b.N-1);return {c,d};}
 	friend poly operator/(poly a,int b){return a*pow(b,P-2);}
+	friend poly operator<<(poly a,int b){poly c(a.N+b,vector<int>(0));For(i,b,a.N+b-1)c[i]=a[i-b];return c;}
 	poly Reverse(){poly ans;ans.N=N;ans.K=K;ans.a.resize(K);For(i,0,N-1)ans[i]=a[N-1-i];return ans;}
 	poly Inv()
 	{
