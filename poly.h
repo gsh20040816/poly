@@ -72,3 +72,10 @@ struct Getval
 	void GetvalWork(poly f,int node,int l,int r,vector<int>&ans){if(l==r){ans[l]=f[0];return;}int mid=l+r>>1;GetvalWork((f/mul[node<<1]).second,node<<1,l,mid,ans);GetvalWork((f/mul[node<<1|1]).second,node<<1|1,mid+1,r,ans);}
 	vector<int>GetVal(){f=f.ChangeLength(max(f.N,M+1));mul.resize(GetMxnode(1,0,M-1)+1);f=(f/GetvalPre(1,0,M-1,Point)).second;vector<int>ans(M);GetvalWork(f,1,0,M-1,ans);return ans;}
 };
+struct Getpoly
+{
+	int N;vector<int>x,y,val;Getpoly(int M,vector<int>a,vector<int>b){N=M;x=a;y=b;}
+	poly GetpolyPre(int l,int r){if(l==r)return poly(2,vector<int>{P-x[l],1});int mid=l+r>>1;return GetpolyPre(l,mid)*GetpolyPre(mid+1,r);}
+	poly GetpolyWork(int l,int r,poly&mul){if(l==r)return mul=poly(2,vector<int>{P-x[l],1}),poly(1ll*y[l]*pow(val[l],P-2)%P);int mid=l+r>>1;poly a,b;poly c=GetpolyWork(l,mid,a),d=GetpolyWork(mid+1,r,b);return mul=a*b,b*c+a*d;}
+	poly GetPoly(){poly g=GetpolyPre(0,N-1);val=Getval(g.Delta(),x).GetVal();return GetpolyWork(0,N-1,g);}
+};
