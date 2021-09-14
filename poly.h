@@ -52,7 +52,7 @@ struct poly
 		poly tmp=ChangeLength(N+1>>1).Sqrt();return ((tmp+(*this)*tmp.ChangeLength(N).Inv())/2).ChangeLength(N);
 	}
 	poly Delta(){poly ans;ans.N=N;ans.K=K;ans.a.resize(ans.K);For(i,0,N-2)ans[i]=1ll*(i+1)*a[i+1]%P;return ans;}
-	poly Sum(){poly ans;ans.N=N;ans.K=K;ans.a.resize(ans.K);For(i,1,N)ans[i]=1ll*pow(i,P-2)*a[i-1]%P;return ans;}
+	poly Sum(){poly ans;ans.N=N;ans.K=K;ans.a.resize(ans.K);For(i,1,N-1)ans[i]=1ll*pow(i,P-2)*a[i-1]%P;return ans;}
 	poly Ln(){return (Delta()*Inv()).ChangeLength(N).Sum().ChangeLength(N);}
 	poly Exp()
 	{
