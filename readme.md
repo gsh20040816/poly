@@ -9,5 +9,5 @@
 - 快速幂(弱化版)
 - sqrt
 - sin/cos
-- 多点求值(Fast Fast TLE)
+- 多点求值
 - 快速插值
