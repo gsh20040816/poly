@@ -42,6 +42,7 @@ struct poly
 	friend poly operator/(poly a,int b){return a*pow(b,P-2);}
 	friend poly operator<<(poly a,int b){poly c(a.N+b,vector<int>(0));For(i,b,a.N+b-1)c[i]=a[i-b];return c;}
 	poly Reverse(){poly ans;ans.N=N;ans.K=K;ans.a.resize(K);For(i,0,N-1)ans[i]=a[N-1-i];return ans;}
+	poly MulT(poly b){if(b.N>N)b=b.ChangeLength(N);return (Reverse()*b).ChangeLength(N).Reverse();}
 	poly Inv()
 	{
 		if(N==1)return poly(pow(a[0],P-2));
@@ -67,11 +68,11 @@ struct poly
 };
 struct Getval
 {
-	int M;poly f;vector<int>Point;vector<poly>mul;Getval(poly a,vector<int>point){M=point.size();f=a;Point=point;}
-	poly GetvalPre(int node,int l,int r,const vector<int>&point){if(l==r)return mul[node]=poly(2,vector<int>{P-point[l],1});int mid=l+r>>1;return mul[node]=GetvalPre(node<<1,l,mid,point)*GetvalPre(node<<1|1,mid+1,r,point);}
+	int M,K;poly f;vector<int>Point;vector<poly>mul;Getval(poly a,vector<int>point){f=a;M=point.size();Point=point;}
 	int GetMxnode(int node,int l,int r){if(l==r)return node;int mid=l+r>>1;return max(GetMxnode(node<<1,l,mid),GetMxnode(node<<1|1,mid+1,r));}
-	void GetvalWork(poly f,int node,int l,int r,vector<int>&ans){if(l==r){ans[l]=f[0];return;}int mid=l+r>>1;GetvalWork((f/mul[node<<1]).second,node<<1,l,mid,ans);GetvalWork((f/mul[node<<1|1]).second,node<<1|1,mid+1,r,ans);}
-	vector<int>GetVal(){f=f.ChangeLength(max(f.N,M+1));mul.resize(GetMxnode(1,0,M-1)+1);f=(f/GetvalPre(1,0,M-1,Point)).second;vector<int>ans(M);GetvalWork(f,1,0,M-1,ans);return ans;}
+	poly GetvalPre(int node,int l,int r){if(l==r)return mul[node]=poly(2,vector<int>{1,(P-Point[l])%P});int mid=l+r>>1;return mul[node]=GetvalPre(node<<1,l,mid)*GetvalPre(node<<1|1,mid+1,r);}
+	void GetvalWork(poly f,int node,int l,int r,vector<int>&ans){if(l>=M)return;f=f.ChangeLength(r-l+1);if(l==r){ans[l]=f[0];return;}int mid=l+r>>1;GetvalWork(f.MulT(mul[node<<1|1]),node<<1,l,mid,ans);GetvalWork(f.MulT(mul[node<<1]),node<<1|1,mid+1,r,ans);}
+	vector<int>GetVal(){K=max(M,f.N);f=f.ChangeLength(K);Point.resize(K);mul.resize(GetMxnode(1,0,K-1)+1);mul[1]=GetvalPre(1,0,K-1);vector<int>ans(M);GetvalWork(f.MulT(mul[1].ChangeLength(K).Inv()),1,0,K-1,ans);return ans;}
 };
 struct Getpoly
 {
